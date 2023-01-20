@@ -13,6 +13,10 @@ namespace Discy.Insfrastructure.Persistence.Context
     public class DiscyContext:DbContext
     {
         public const string DEFAULT_SCHEMA = "dbo";
+        public DiscyContext()
+        {
+
+        }
         public DiscyContext(DbContextOptions options):base(options)
         {
 
@@ -25,7 +29,18 @@ namespace Discy.Insfrastructure.Persistence.Context
         public DbSet<EntryCommentVote> EntryCommentVotes { get; set; }
         public DbSet<EntryCommentFavorite> EntryCommentFavorites { get; set; }
         public DbSet<EmailConfirmation> EmailConfirmations { get; set; }
-        
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+           if(!optionsBuilder.IsConfigured)
+            {
+                var connStr = "Server=localhost\\SQLEXPRESS;Database=Discy;Integrated Security=true";
+                optionsBuilder.UseSqlServer(connStr, opt =>
+                {
+                    opt.EnableRetryOnFailure();
+                });
+            }
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

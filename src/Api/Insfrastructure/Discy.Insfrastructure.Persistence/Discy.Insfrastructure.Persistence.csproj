@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Core\Discy.Api.Application\Discy.Api.Application.csproj" />
     <ProjectReference Include="..\..\Core\Discy.Api.Domain\Discy.Api.Domain.csproj" />
   </ItemGroup>
 
