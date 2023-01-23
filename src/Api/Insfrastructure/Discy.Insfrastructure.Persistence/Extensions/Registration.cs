@@ -1,4 +1,6 @@
-﻿using Discy.Insfrastructure.Persistence.Context;
+﻿using Discy.Api.Application.Repositories;
+using Discy.Insfrastructure.Persistence.Context;
+using Discy.Insfrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +24,9 @@ namespace Discy.Insfrastructure.Persistence.Extensions
                     opt.EnableRetryOnFailure(); //veri tabanında hata olursa
                 });
             });
+
+            services.AddScoped<IUserRepository, UserRepository>();
+
             //var seedData = new SeedData();
             //seedData.SeedAsync(configuration).GetAwaiter().GetResult();
             return services;

@@ -10,14 +10,14 @@ namespace Discy.Api.Application.Repositories
 {
     public interface IGenericRepository<TEntity>where TEntity : BaseEntity
     {
-        Task<int> AddAsync(TEntity user);
+        Task<int> AddAsync(TEntity entity);
         int Add(TEntity entity);
         int Add(IEnumerable<TEntity> entities);
         Task<int> AddAsync(IEnumerable<TEntity> entities);
 
 
 
-        Task<int> UpdateAsync(TEntity user);
+        Task<int> UpdateAsync(TEntity entity);
         int Update(TEntity entity);
 
 
