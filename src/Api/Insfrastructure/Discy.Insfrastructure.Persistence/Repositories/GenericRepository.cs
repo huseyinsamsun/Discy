@@ -15,36 +15,36 @@ namespace Discy.Insfrastructure.Persistence.Repositories
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
     {
-        private readonly DiscyContext discyContext;
-        protected DbSet<TEntity> entity => discyContext.Set<TEntity>();
-        public GenericRepository(DiscyContext discyContext)
+        private readonly DbContext dbContext;
+        protected DbSet<TEntity> entity => dbContext.Set<TEntity>();
+        public GenericRepository(DbContext dbContext)
         {
-            this.discyContext = discyContext ?? throw new ArgumentNullException(nameof(discyContext));
+            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public virtual  int Add(TEntity entity)
         {
             this.entity.Add(entity);
-            return discyContext.SaveChanges(); ;
+            return dbContext.SaveChanges(); ;
 
         }
 
         public virtual int Add(IEnumerable<TEntity> entities)
         {
              this.entity.AddRange(entities);
-            return discyContext.SaveChanges();
+            return dbContext.SaveChanges();
         }
 
         public virtual async Task<int> AddAsync(TEntity entity)
         {
             await this.entity.AddAsync(entity);
-            return await discyContext.SaveChangesAsync();
+            return await dbContext.SaveChangesAsync();
         }
 
         public virtual async Task<int> AddAsync(IEnumerable<TEntity> entities)
         {
             await this.entity.AddRangeAsync(entities);
-            return await discyContext.SaveChangesAsync();
+            return await dbContext.SaveChangesAsync();
              
         }
 
@@ -52,8 +52,8 @@ namespace Discy.Insfrastructure.Persistence.Repositories
         {
             if(!this.entity.Local.Any(i=>EqualityComparer<Guid>.Default.Equals(i.Id,entity.Id)))
                 
-              discyContext.Update(entity);
-            return discyContext.SaveChanges();
+              dbContext.Update(entity);
+            return dbContext.SaveChanges();
             
         }
 
@@ -62,8 +62,8 @@ namespace Discy.Insfrastructure.Persistence.Repositories
 
             if (!this.entity.Local.Any(i => EqualityComparer<Guid>.Default.Equals(i.Id, entity.Id))) //memory de entry kontrolü
 
-                discyContext.Update(entity);
-            return discyContext.SaveChangesAsync();
+                dbContext.Update(entity);
+            return dbContext.SaveChangesAsync();
         }
 
         public virtual IQueryable<TEntity> AsQueryable() => entity.AsQueryable();
@@ -75,7 +75,7 @@ namespace Discy.Insfrastructure.Persistence.Repositories
            await Task.CompletedTask;
         
             await entity.AddRangeAsync(entities);
-            await discyContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
 
         public virtual async Task BulkDelete(Expression<Func<TEntity, bool>> predicate)
@@ -84,7 +84,7 @@ namespace Discy.Insfrastructure.Persistence.Repositories
             if (entitiesToDelete.Any())
             {
                 entity.RemoveRange(entitiesToDelete);
-                await discyContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
             }
         }
 
@@ -93,7 +93,7 @@ namespace Discy.Insfrastructure.Persistence.Repositories
  
 
              entity.RemoveRange(entities);
-             return discyContext.SaveChangesAsync();
+             return dbContext.SaveChangesAsync();
         }
 
         public virtual Task BulkDeleteById(IEnumerable<Guid> ids)
@@ -101,8 +101,8 @@ namespace Discy.Insfrastructure.Persistence.Repositories
             if (ids != null && ids.Any())
                 return Task.CompletedTask;
 
-            discyContext.RemoveRange(entity.Where(i => ids.Contains(i.Id)));
-            return discyContext.SaveChangesAsync();
+            dbContext.RemoveRange(entity.Where(i => ids.Contains(i.Id)));
+            return dbContext.SaveChangesAsync();
         }
 
         public async Task  BulkUpdate(IEnumerable<TEntity> entities)
@@ -110,18 +110,18 @@ namespace Discy.Insfrastructure.Persistence.Repositories
             if (entities != null && entities.Any())
             {
                 entity.UpdateRange(entities);
-                await discyContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
             }
         }
 
         public virtual int Delete(TEntity entity)
         {
-            if(discyContext.Entry(entity).State==EntityState.Detached)
+            if(dbContext.Entry(entity).State==EntityState.Detached)
             {
                 this.entity.Attach(entity);
             }
             this.entity.Remove(entity);
-            return discyContext.SaveChanges();
+            return dbContext.SaveChanges();
         }
 
         public virtual int Delete(Guid id)
@@ -138,24 +138,24 @@ namespace Discy.Insfrastructure.Persistence.Repositories
 
         public virtual Task<int> DeleteAsync(TEntity entity)
         {
-           if(discyContext.Entry(entity).State==EntityState.Detached)
+           if(dbContext.Entry(entity).State==EntityState.Detached)
             {
                 this.entity.Attach(entity);
             }
             this.entity.Remove(entity);
-            return discyContext.SaveChangesAsync();
+            return dbContext.SaveChangesAsync();
         }
 
         public virtual bool DeleteRange(Expression<Func<TEntity, bool>> predicate)
         {
-            discyContext.RemoveRange(predicate);
-            return discyContext.SaveChanges() > 0;
+            dbContext.RemoveRange(entity.Where(predicate));
+            return dbContext.SaveChanges() > 0;
         }
 
         public virtual async Task<bool> DeleteRangeAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            discyContext.RemoveRange(predicate);
-            return await discyContext.SaveChangesAsync()>0;
+            dbContext.RemoveRange(predicate);
+            return await dbContext.SaveChangesAsync()>0;
         }
 
         public Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, bool noTracking = true, params Expression<Func<TEntity, object>>[] includes)
@@ -204,10 +204,10 @@ namespace Discy.Insfrastructure.Persistence.Repositories
             if (found == null)
                 return null;
             if(noTracking)
-                discyContext.Entry(found).State = EntityState.Detached;
+                dbContext.Entry(found).State = EntityState.Detached;
             foreach (Expression<Func<TEntity, object>> include in includes)
             {
-                discyContext.Entry(found).Reference(include).Load();
+                dbContext.Entry(found).Reference(include).Load();
             }
             return found;
         }
@@ -251,23 +251,23 @@ namespace Discy.Insfrastructure.Persistence.Repositories
         public virtual int Update(TEntity entity)
         {
             this.entity.Attach(entity);
-            discyContext.Entry(entity).State = EntityState.Modified;
-            return discyContext.SaveChanges();
+            dbContext.Entry(entity).State = EntityState.Modified;
+            return dbContext.SaveChanges();
         }
 
         public virtual async Task<int> UpdateAsync(TEntity entity)
         {
             this.entity.Attach(entity);
-            discyContext.Entry(entity).State = EntityState.Modified;
-            return await discyContext.SaveChangesAsync();
+            dbContext.Entry(entity).State = EntityState.Modified;
+            return await dbContext.SaveChangesAsync();
         }
         public int SaveChanges()
         {
-            return discyContext.SaveChanges();
+            return dbContext.SaveChanges();
         }
         public Task<int> SaveChangesAsync()
         {
-            return discyContext.SaveChangesAsync();
+            return dbContext.SaveChangesAsync();
         }
 
     }
