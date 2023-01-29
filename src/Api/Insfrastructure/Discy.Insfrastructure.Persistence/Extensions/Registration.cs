@@ -19,7 +19,7 @@ namespace Discy.Insfrastructure.Persistence.Extensions
             var connStr = configuration["DiscyDbConnectionString"].ToString();
             services.AddDbContext<DiscyContext>(conf =>
             {
-                conf.UseSqlServer("connStr", opt =>
+                conf.UseSqlServer(connStr, opt =>
                 {
                     opt.EnableRetryOnFailure(); //veri tabanında hata olursa
                 });
