@@ -20,6 +20,7 @@ namespace Discy.Api.WebApi.Controllers
         public async Task<IActionResult> Login([FromBody]LoginUserCommand command)
         {
             var res = await mediator.Send(command);
+            //selam
             return Ok(res);
         }
         [HttpPost]
